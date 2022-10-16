@@ -1,0 +1,451 @@
+<!doctype html>
+<html>
+	<head>
+		<title>tetris</title>
+		<meta charset="utf-8" />
+
+		<style>
+			.field
+			{
+				width:40px;
+				height:40px;
+			}
+			table, td
+			{
+				border:1px solid black;
+				border-collapse:collapse;
+				margin-left:auto;
+				margin-right:auto;
+			}
+			td
+			{
+				background-color:white;
+			}
+			#score
+			{
+				text-align:center;
+				width:200px;
+				height:175px;
+				border:1px solid black;
+				position:absolute;
+				right:20%;
+				top:10%;
+			}
+		</style>
+	</head>
+	
+	<script>
+		var figure, currentColor, x1, y1, x2, y2, x3, y3, x4, y4, rotationCL,rotationCCL, lanes=0;
+		var xTransformCL = new Array();
+		var yTransformCL = new Array();
+		var xTransformCCL = new Array();
+		var yTransformCCL = new Array();
+		function GetPosition(a,b)
+		{
+			return b + "." + a;
+		}
+		function FallDown(yi)
+		{
+			let k;
+			for (let z=yi+1;z<=20;z++)
+			 {
+			 
+			   for (let q=1;q<=10;q++)
+			   {
+			    k=document.getElementById(GetPosition(q,z)).style.backgroundColor;
+				st=document.getElementById(GetPosition(q,z)).getAttribute("status");
+				document.getElementById(GetPosition(q,z)).style.backgroundColor="white";
+				document.getElementById(GetPosition(q,z-1)).style.backgroundColor = k;
+				document.getElementById(GetPosition(q,z)).setAttribute("status","bg");
+				document.getElementById(GetPosition(q,z-1)).setAttribute("status",st);
+			   }
+			 
+			 }
+		}
+		function SetTransformArrays()
+		{
+			if (figure==0)
+			{
+					xTransformCL = [[x1,x2,x3,x4],[x1,x2,x3,x4],[x1,x2,x3,x4],[x1,x2,x3,x4]];
+					yTransformCL = [[y1,y2,y3,y4],[y1,y2,y3,y4],[y1,y2,y3,y4],[y1,y2,y3,y4]];
+					xTransformCCL = [[x1,x2,x3,x4],[x1,x2,x3,x4],[x1,x2,x3,x4],[x1,x2,x3,x4]];
+					yTransformCCL = [[y1,y2,y3,y4],[y1,y2,y3,y4],[y1,y2,y3,y4],[y1,y2,y3,y4]];
+			}
+			else if (figure==1)
+			{
+					xTransformCL = [[x3,x3,x3,x3],[x3-2,x3-1,x3,x3+1],[x3,x3,x3,x3],[x3-2,x3-1,x3,x3+1]];
+					yTransformCL = [[y3+2,y3+1,y3,y3-1],[y3,y3,y3,y3],[y3+2,y3+1,y3,y3-1],[y3,y3,y3,y3]];
+					xTransformCCL = [[x2,x2,x2,x2],[x2-2,x2,x2-1,x2+1],[x2,x2,x2,x2],[x2-2,x2,x2-1,x2+1]];
+					yTransformCCL = [[y3+2,y3+1,y3,y3-1],[y3,y3,y3,y3],[y3+2,y3+1,y3,y3-1],[y3,y3,y3,y3]];
+			}
+			else if (figure==2)
+			{
+					xTransformCL = [[x2,x2,x3,x4],[x2-1,x2,x2+1,x2],[x2,x2,x2,x2-1],[x2-1,x2,x2+1,x2]];
+					yTransformCL = [[y2-1,y2,y3,y4],[y2,y2,y2,y2-1],[y2+1,y2,y2-1,y2],[y2,y2,y2,y2+1]];
+					xTransformCCL = [[x2,x2,x2,x2-1],[x2-1,x2,x2+1,x2],[x2,x2,x2+1,x2],[x2-1,x2,x2+1,x2]];
+					yTransformCCL = [[y2+1,y2,y2-1,y2],[y2,y2,y2,y2-1],[y2-1,y2,y2,y2+1],[y2,y2,y2,y2+1]];
+			}
+			else if (figure==3)
+			{
+					xTransformCL = [[x2,x2,x2+1,x2+1],[x2-1,x2,x2,x2+1],[x2,x2,x2+1,x2+1],[x2-1,x2,x2,x2+1]];
+					yTransformCL = [[y2+1,y2,y2,y2-1],[y2,y2,y2+1,y2+1],[y2+1,y2,y2,y2-1],[y2,y2,y2+1,y2+1]];
+					xTransformCCL = [[x2,x2,x2+1,x2+1],[x2-1,x2,x2,x2+1],[x2,x2,x2+1,x2+1],[x2-1,x2,x2,x2+1]];
+					yTransformCCL = [[y2+1,y2,y2,y2-1],[y2,y2,y2+1,y2+1],[y2+1,y2,y2,y2-1],[y2,y2,y2+1,y2+1]];
+			}
+			else if (figure==4)
+			{
+					xTransformCL = [[x3+1,x3+1,x3,x3],[x3+1,x3,x3,x3-1],[x3+1,x3+1,x3,x3],[x3+1,x3,x3,x3-1]];
+					yTransformCL = [[y3+1,y3,y3,y3-1],[y3+1,y3+1,y3,y3],[y3+1,y3,y3,y3-1],[y3+1,y3+1,y3,y3]];
+					xTransformCCL = [[x3+1,x3+1,x3,x3],[x3-1,x3,x3,x3+1],[x3+1,x3+1,x3,x3],[x3+1,x3,x3,x3-1]];
+					yTransformCCL = [[y3+1,y3,y3,y3-1],[y3+1,y3+1,y3,y3],[y3+1,y3,y3,y3-1],[y3+1,y3+1,y3,y3]];
+			}
+			else if (figure==5)
+			{
+					xTransformCL = [[x1,x1,x1,x1+1],[x1,x1+1,x1+2,x1+2],[x3,x3-1,x3,x3],[x2-1,x2-1,x2,x2+1]];
+					yTransformCL = [[y1,y1-1,y1+1,y1+1],[y1,y1,y1,y1-1],[y3+1,y3-1,y3,y3-1],[y2+1,y2,y2,y2]];
+					xTransformCCL = [[x4,x4-1,x4,x4],[x4-2,x4-1,x4,x4],[x1,x1,x1,x1+1],[x1,x1,x1+1,x1+2]];
+					yTransformCCL = [[y4+2,y4,y4+1,y4],[y4+1,y4+1,y4+1,y4],[y1,y1-1,y1+1,y1+1],[y1,y1-1,y1-1,y1-1]];
+			}
+			else if (figure==6)
+			{
+					xTransformCL = [[x1,x1+1,x1,x1],[x1,x1+1,x1,x1+2],[x4-1,x4,x4,x4],[x3-2,x3-1,x3,x3]];
+					yTransformCL = [[y1,y1,y1+1,y1+2],[y1,y1+1,y1+1,y1+1],[y4+1,y4+1,y4-1,y4],[y3,y3,y3,y3+1]];
+					xTransformCCL = [[x3-1,x3,x3,x3],[x4-2,x4-1,x4-2,x4],[x3,x3+1,x3,x3],[x1,x1+1,x1+2,x1+2]];
+					yTransformCCL = [[y3+2,y3+2,y3,y3+1],[y4-1,y4,y4,y4],[y3-1,y3-1,y3,y3+1],[y1,y1,y1,y1+1]];
+			}
+		}
+		function SetBlockColor(c, xi1=x1, yi1=y1, xi2=x2, yi2=y2, xi3=x3, yi3=y3, xi4=x4, yi4=y4)
+		{
+					document.getElementById(GetPosition(xi1,yi1)).style.backgroundColor = c;
+					document.getElementById(GetPosition(xi2,yi2)).style.backgroundColor = c;
+					document.getElementById(GetPosition(xi3,yi3)).style.backgroundColor = c;
+					document.getElementById(GetPosition(xi4,yi4)).style.backgroundColor = c;
+		}
+		function SetBlockStatus(s, xi1=x1, yi1=y1, xi2=x2, yi2=y2, xi3=x3, yi3=y3, xi4=x4, yi4=y4)
+		{
+				document.getElementById(GetPosition(xi1,yi1)).setAttribute("status",s);
+				document.getElementById(GetPosition(xi2,yi2)).setAttribute("status",s);
+				document.getElementById(GetPosition(xi3,yi3)).setAttribute("status",s);
+				document.getElementById(GetPosition(xi4,yi4)).setAttribute("status",s);	
+		}
+		function ClearLane()
+		{
+			let white=0;
+			let clear=false;
+			let c;
+			let yi;
+			let l;
+			for (let i=1;i<=20;i++)
+			 {
+				for (let j=1;j<=10;j++)
+					{
+					  c = document.getElementById(GetPosition(j,i)).getAttribute("status");
+					  if (c=="bg") {white=1}
+					  if ((j==10)&&(white==0))
+					   {
+					      clear=true;
+					   }
+					  else if ((j==10)&&(white==1)) {white=0;}
+					}
+					if (clear==true) { yi=i;break;}
+			 }
+			 if (clear==true)
+					   {
+						 for (let o=1;o<=10;o++)
+						  {
+						    document.getElementById(GetPosition(o,yi)).style.backgroundColor="white";
+						    document.getElementById(GetPosition(o,yi)).setAttribute("status","bg");
+						  }
+						  	lanes+=1;
+							document.getElementById("lanesval").innerHTML = lanes;
+							FallDown(yi);
+							ClearLane();
+							
+					   }
+		}
+		function NewBlock()
+			{
+				ClearLane();
+				figure = Math.floor(Math.random()*7+0);
+				if (figure==0)
+				{
+					currentColor = "#f984e5";
+					x1=5; y1=20;
+					x2=6; y2=20;
+					x3=5; y3=19;
+					x4=6; y4=19;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+					
+				}
+				else if (figure==1)
+				{
+					currentColor = "cyan";
+					x1=4; y1=19;
+					x2=5; y2=19;
+					x3=6; y3=19;
+					x4=7; y4=19;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+				else if (figure==2)
+				{
+					currentColor = "darkviolet";
+					x1=4; y1=19;
+					x2=5; y2=19;
+					x3=6; y3=19;
+					x4=5; y4=20;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+				else if (figure==3)
+				{
+					currentColor = "green";
+					x1=4; y1=19;
+					x2=5; y2=19;
+					x3=5; y3=20;
+					x4=6; y4=20;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+				else if (figure==4)
+				{
+					currentColor = "red";
+					x1=4; y1=20;
+					x2=5; y2=20;
+					x3=5; y3=19;
+					x4=6; y4=19;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+				else if (figure==5)
+				{
+					currentColor = "orange";
+					x1=4; y1=20;
+					x2=4; y2=19;
+					x3=5; y3=19;
+					x4=6; y4=19;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+				else if (figure==6)
+				{
+					currentColor = "blue";
+					x1=4; y1=19;
+					x2=5; y2=19;
+					x3=6; y3=19;
+					x4=6; y4=20;
+					rotationCL = 0;
+					rotationCCL = 0;
+					SetTransformArrays();
+					SetBlockColor(currentColor);
+				}
+			SetBlockStatus("current");	
+			}
+		function MoveX()
+		{
+			var keycode = event.charCode || event.keyCode;
+			var key = String.fromCharCode(keycode);
+			if (key=="w")
+			{
+
+					xi1 = xTransformCL[rotationCL][0]; yi1 = yTransformCL[rotationCL][0];
+					xi2 = xTransformCL[rotationCL][1]; yi2 = yTransformCL[rotationCL][1];
+					xi3 = xTransformCL[rotationCL][2]; yi3 = yTransformCL[rotationCL][2];
+					xi4 = xTransformCL[rotationCL][3]; yi4 = yTransformCL[rotationCL][3];
+
+					if (!((xi1<1)||(xi1>10)||(xi2<1)||(xi2>10)||(xi3<1)||(xi3>10)||(xi4<1)||(xi4>10)||
+						(yi1<1)||(yi1>20)||(yi2<1)||(yi2>20)||(yi3<1)||(yi3>20)||(yi4<1)||(yi4>20)))
+						{
+							st1 = document.getElementById(GetPosition(xi1,yi1)).getAttribute("status");
+							st2 = document.getElementById(GetPosition(xi2,yi2)).getAttribute("status");
+							st3 = document.getElementById(GetPosition(xi3,yi3)).getAttribute("status");
+							st4 = document.getElementById(GetPosition(xi4,yi4)).getAttribute("status");
+							if ((st1!="block")&&(st2!="block")&&(st3!="block")&&(st4!="block"))
+							{
+								SetBlockColor("white");
+								SetBlockStatus("bg");
+								x1 = xi1; y1 = yi1;
+								x2 = xi2; y2 = yi2;
+								x3 = xi3; y3 = yi3;
+								x4 = xi4; y4 = yi4;
+								SetBlockColor(currentColor);
+								SetBlockStatus("current");
+								rotationCL++;
+								if (rotationCL > 3) {rotationCL=0;}
+								rotationCCL = rotationCL + 2;
+								if (rotationCCL > 3) {rotationCCL-=4}
+								
+							}
+						
+				}
+				
+			}
+			if (key=="s")
+				{
+					
+					xi1 = xTransformCCL[rotationCCL][0]; yi1 = yTransformCCL[rotationCCL][0];
+					xi2 = xTransformCCL[rotationCCL][1]; yi2 = yTransformCCL[rotationCCL][1];
+					xi3 = xTransformCCL[rotationCCL][2]; yi3 = yTransformCCL[rotationCCL][2];
+					xi4 = xTransformCCL[rotationCCL][3]; yi4 = yTransformCCL[rotationCCL][3];
+					if (!((xi1<1)||(xi1>10)||(xi2<1)||(xi2>10)||(xi3<1)||(xi3>10)||(xi4<1)||(xi4>10)||
+						(yi1<1)||(yi1>20)||(yi2<1)||(yi2>20)||(yi3<1)||(yi3>20)||(yi4<1)||(yi4>20)))
+						{
+							
+							st1 = document.getElementById(GetPosition(xi1,yi1)).getAttribute("status");
+							st2 = document.getElementById(GetPosition(xi2,yi2)).getAttribute("status");
+							st3 = document.getElementById(GetPosition(xi3,yi3)).getAttribute("status");
+							st4 = document.getElementById(GetPosition(xi4,yi4)).getAttribute("status");
+							if ((st1!="block")&&(st2!="block")&&(st3!="block")&&(st4!="block"))
+							{
+								console.log(rotationCCL);
+								SetBlockColor("white");
+								SetBlockStatus("bg");
+								x1 = xi1; y1 = yi1;
+								x2 = xi2; y2 = yi2;
+								x3 = xi3; y3 = yi3;
+								x4 = xi4; y4 = yi4;
+								SetBlockColor(currentColor);
+								SetBlockStatus("current");
+								rotationCCL++;
+								if (rotationCCL>3) {rotationCCL=0;}
+								rotationCL = rotationCCL - 2;
+								if (rotationCL<0) {rotationCL+=4;}
+							}
+						}
+				}
+			if (key=="a")
+				{
+
+					if ((x1-1>0)&&(x2-1>0)&&(x3-1>0)&&(x4-1>0))
+					{
+					let st1=document.getElementById(GetPosition(x1-1,y1)).getAttribute("status");
+					let st2=document.getElementById(GetPosition(x2-1,y2)).getAttribute("status");
+					let st3=document.getElementById(GetPosition(x3-1,y3)).getAttribute("status");
+					let st4=document.getElementById(GetPosition(x4-1,y4)).getAttribute("status");
+					
+						if ((st1!="block")&&(st2!="block")&&(st3!="block")&&(st4!="block"))
+						{
+							SetBlockColor("white");
+							SetBlockStatus("bg");
+							x1-=1;
+							x2-=1;
+							x3-=1;
+							x4-=1;
+							SetBlockColor(currentColor);
+						
+						}
+					
+					}
+				}
+			if (key=="d")
+				{
+					if ((x1+1<=10)&&(x2+1<=10)&&(x3+1<=10)&&(x4+1<=10))
+					{
+					let st1=document.getElementById(GetPosition(x1+1,y1)).getAttribute("status");
+					let st2=document.getElementById(GetPosition(x2+1,y2)).getAttribute("status");
+					let st3=document.getElementById(GetPosition(x3+1,y3)).getAttribute("status");
+					let st4=document.getElementById(GetPosition(x4+1,y4)).getAttribute("status");
+					
+						if ((st1!="block")&&(st2!="block")&&(st3!="block")&&(st4!="block"))
+						{
+							SetBlockColor("white");
+							SetBlockStatus("bg");
+							x1+=1;
+							x2+=1;
+							x3+=1;
+							x4+=1;
+							SetBlockColor(currentColor);
+						
+						}
+					
+					}
+
+				}
+				SetTransformArrays();
+				SetBlockStatus("current");
+		}
+		function MoveY()
+		{
+							
+							let newB=false;
+							let st1,st2,st3,st4;
+							if ((y1<=1)||(y2<=1)||(y3<=1)||(y4<=1)) {newB=true;}
+							else
+							{
+								st1 = document.getElementById(GetPosition(x1,y1-1)).getAttribute("status");
+								st2 = document.getElementById(GetPosition(x2,y2-1)).getAttribute("status");
+								st3 = document.getElementById(GetPosition(x3,y3-1)).getAttribute("status");
+								st4 = document.getElementById(GetPosition(x4,y4-1)).getAttribute("status");
+								if ((st1=="block")||(st2=="block")||(st3=="block")||(st4=="block"))
+								{
+									newB=true;
+								}
+								else
+								{
+									SetBlockColor("white");
+									SetBlockStatus("bg");
+									y1-=1;
+									y2-=1;
+									y3-=1;
+									y4-=1;
+									SetBlockColor(currentColor);
+									SetBlockStatus("current");
+									
+								}
+								
+							}
+							SetTransformArrays();
+							if (newB==true)
+							{
+							SetBlockStatus("block");
+							NewBlock();
+							}
+							
+		}
+		
+		window.onload = NewBlock;
+		setInterval(MoveY, 150);
+		window.onkeypress = MoveX;
+	</script>
+	<body>
+		<div id="score">
+			<h1>LANES</h1>
+			<p id="lanesval">0</p>
+		</div>
+		<table id="tetrion">	
+		<tr class="row" id="row20"><td class="field" id="20.1" status="bg"></td><td class="field" id="20.2" status="bg"></td><td class="field" id="20.3" status="bg"></td><td class="field" id="20.4" status="bg"></td><td class="field" id="20.5" status="bg"></td><td class="field" id="20.6" status="bg"></td><td class="field" id="20.7" status="bg"></td><td class="field" id="20.8" status="bg"></td><td class="field" id="20.9" status="bg"></td><td class="field" id="20.10" status="bg"></td></tr>
+		<tr class="row" id="row19"><td class="field" id="19.1" status="bg"></td><td class="field" id="19.2" status="bg"></td><td class="field" id="19.3" status="bg"></td><td class="field" id="19.4" status="bg"></td><td class="field" id="19.5" status="bg"></td><td class="field" id="19.6" status="bg"></td><td class="field" id="19.7" status="bg"></td><td class="field" id="19.8" status="bg"></td><td class="field" id="19.9" status="bg"></td><td class="field" id="19.10" status="bg"></td></tr>
+		<tr class="row" id="row18"><td class="field" id="18.1" status="bg"></td><td class="field" id="18.2" status="bg"></td><td class="field" id="18.3" status="bg"></td><td class="field" id="18.4" status="bg"></td><td class="field" id="18.5" status="bg"></td><td class="field" id="18.6" status="bg"></td><td class="field" id="18.7" status="bg"></td><td class="field" id="18.8" status="bg"></td><td class="field" id="18.9" status="bg"></td><td class="field" id="18.10" status="bg"></td></tr>
+		<tr class="row" id="row17"><td class="field" id="17.1" status="bg"></td><td class="field" id="17.2" status="bg"></td><td class="field" id="17.3" status="bg"></td><td class="field" id="17.4" status="bg"></td><td class="field" id="17.5" status="bg"></td><td class="field" id="17.6" status="bg"></td><td class="field" id="17.7" status="bg"></td><td class="field" id="17.8" status="bg"></td><td class="field" id="17.9" status="bg"></td><td class="field" id="17.10" status="bg"></td></tr>
+		<tr class="row" id="row16"><td class="field" id="16.1" status="bg"></td><td class="field" id="16.2" status="bg"></td><td class="field" id="16.3" status="bg"></td><td class="field" id="16.4" status="bg"></td><td class="field" id="16.5" status="bg"></td><td class="field" id="16.6" status="bg"></td><td class="field" id="16.7" status="bg"></td><td class="field" id="16.8" status="bg"></td><td class="field" id="16.9" status="bg"></td><td class="field" id="16.10" status="bg"></td></tr>
+		<tr class="row" id="row15"><td class="field" id="15.1" status="bg"></td><td class="field" id="15.2" status="bg"></td><td class="field" id="15.3" status="bg"></td><td class="field" id="15.4" status="bg"></td><td class="field" id="15.5" status="bg"></td><td class="field" id="15.6" status="bg"></td><td class="field" id="15.7" status="bg"></td><td class="field" id="15.8" status="bg"></td><td class="field" id="15.9" status="bg"></td><td class="field" id="15.10" status="bg"></td></tr>
+		<tr class="row" id="row14"><td class="field" id="14.1" status="bg"></td><td class="field" id="14.2" status="bg"></td><td class="field" id="14.3" status="bg"></td><td class="field" id="14.4" status="bg"></td><td class="field" id="14.5" status="bg"></td><td class="field" id="14.6" status="bg"></td><td class="field" id="14.7" status="bg"></td><td class="field" id="14.8" status="bg"></td><td class="field" id="14.9" status="bg"></td><td class="field" id="14.10" status="bg"></td></tr>
+		<tr class="row" id="row13"><td class="field" id="13.1" status="bg"></td><td class="field" id="13.2" status="bg"></td><td class="field" id="13.3" status="bg"></td><td class="field" id="13.4" status="bg"></td><td class="field" id="13.5" status="bg"></td><td class="field" id="13.6" status="bg"></td><td class="field" id="13.7" status="bg"></td><td class="field" id="13.8" status="bg"></td><td class="field" id="13.9" status="bg"></td><td class="field" id="13.10" status="bg"></td></tr>
+		<tr class="row" id="row12"><td class="field" id="12.1" status="bg"></td><td class="field" id="12.2" status="bg"></td><td class="field" id="12.3" status="bg"></td><td class="field" id="12.4" status="bg"></td><td class="field" id="12.5" status="bg"></td><td class="field" id="12.6" status="bg"></td><td class="field" id="12.7" status="bg"></td><td class="field" id="12.8" status="bg"></td><td class="field" id="12.9" status="bg"></td><td class="field" id="12.10" status="bg"></td></tr>
+		<tr class="row" id="row11"><td class="field" id="11.1" status="bg"></td><td class="field" id="11.2" status="bg"></td><td class="field" id="11.3" status="bg"></td><td class="field" id="11.4" status="bg"></td><td class="field" id="11.5" status="bg"></td><td class="field" id="11.6" status="bg"></td><td class="field" id="11.7" status="bg"></td><td class="field" id="11.8" status="bg"></td><td class="field" id="11.9" status="bg"></td><td class="field" id="11.10" status="bg"></td></tr>
+		<tr class="row" id="row10"><td class="field" id="10.1" status="bg"></td><td class="field" id="10.2" status="bg"></td><td class="field" id="10.3" status="bg"></td><td class="field" id="10.4" status="bg"></td><td class="field" id="10.5" status="bg"></td><td class="field" id="10.6" status="bg"></td><td class="field" id="10.7" status="bg"></td><td class="field" id="10.8" status="bg"></td><td class="field" id="10.9" status="bg"></td><td class="field" id="10.10" status="bg"></td></tr>
+		<tr class="row" id="row9"><td class="field" id="9.1" status="bg"></td><td class="field" id="9.2" status="bg"></td><td class="field" id="9.3" status="bg"></td><td class="field" id="9.4" status="bg"></td><td class="field" id="9.5" status="bg"></td><td class="field" id="9.6" status="bg"></td><td class="field" id="9.7" status="bg"></td><td class="field" id="9.8" status="bg"></td><td class="field" id="9.9" status="bg"></td><td class="field" id="9.10" status="bg"></td></tr>
+		<tr class="row" id="row8"><td class="field" id="8.1" status="bg"></td><td class="field" id="8.2" status="bg"></td><td class="field" id="8.3" status="bg"></td><td class="field" id="8.4" status="bg"></td><td class="field" id="8.5" status="bg"></td><td class="field" id="8.6" status="bg"></td><td class="field" id="8.7" status="bg"></td><td class="field" id="8.8" status="bg"></td><td class="field" id="8.9" status="bg"></td><td class="field" id="8.10" status="bg"></td></tr>
+		<tr class="row" id="row7"><td class="field" id="7.1" status="bg"></td><td class="field" id="7.2" status="bg"></td><td class="field" id="7.3" status="bg"></td><td class="field" id="7.4" status="bg"></td><td class="field" id="7.5" status="bg"></td><td class="field" id="7.6" status="bg"></td><td class="field" id="7.7" status="bg"></td><td class="field" id="7.8" status="bg"></td><td class="field" id="7.9" status="bg"></td><td class="field" id="7.10" status="bg"></td></tr>
+		<tr class="row" id="row6"><td class="field" id="6.1" status="bg"></td><td class="field" id="6.2" status="bg"></td><td class="field" id="6.3" status="bg"></td><td class="field" id="6.4" status="bg"></td><td class="field" id="6.5" status="bg"></td><td class="field" id="6.6" status="bg"></td><td class="field" id="6.7" status="bg"></td><td class="field" id="6.8" status="bg"></td><td class="field" id="6.9" status="bg"></td><td class="field" id="6.10" status="bg"></td></tr>
+		<tr class="row" id="row5"><td class="field" id="5.1" status="bg"></td><td class="field" id="5.2" status="bg"></td><td class="field" id="5.3" status="bg"></td><td class="field" id="5.4" status="bg"></td><td class="field" id="5.5" status="bg"></td><td class="field" id="5.6" status="bg"></td><td class="field" id="5.7" status="bg"></td><td class="field" id="5.8" status="bg"></td><td class="field" id="5.9" status="bg"></td><td class="field" id="5.10" status="bg"></td></tr>
+		<tr class="row" id="row4"><td class="field" id="4.1" status="bg"></td><td class="field" id="4.2" status="bg"></td><td class="field" id="4.3" status="bg"></td><td class="field" id="4.4" status="bg"></td><td class="field" id="4.5" status="bg"></td><td class="field" id="4.6" status="bg"></td><td class="field" id="4.7" status="bg"></td><td class="field" id="4.8" status="bg"></td><td class="field" id="4.9" status="bg"></td><td class="field" id="4.10" status="bg"></td></tr>
+		<tr class="row" id="row3"><td class="field" id="3.1" status="bg"></td><td class="field" id="3.2" status="bg"></td><td class="field" id="3.3" status="bg"></td><td class="field" id="3.4" status="bg"></td><td class="field" id="3.5" status="bg"></td><td class="field" id="3.6" status="bg"></td><td class="field" id="3.7" status="bg"></td><td class="field" id="3.8" status="bg"></td><td class="field" id="3.9" status="bg"></td><td class="field" id="3.10" status="bg"></td></tr>
+		<tr class="row" id="row2"><td class="field" id="2.1" status="bg"></td><td class="field" id="2.2" status="bg"></td><td class="field" id="2.3" status="bg"></td><td class="field" id="2.4" status="bg"></td><td class="field" id="2.5" status="bg"></td><td class="field" id="2.6" status="bg"></td><td class="field" id="2.7" status="bg"></td><td class="field" id="2.8" status="bg"></td><td class="field" id="2.9" status="bg"></td><td class="field" id="2.10" status="bg"></td></tr>
+		<tr class="row" id="row1"><td class="field" id="1.1" status="bg"></td><td class="field" id="1.2" status="bg"></td><td class="field" id="1.3" status="bg"></td><td class="field" id="1.4" status="bg"></td><td class="field" id="1.5" status="bg"></td><td class="field" id="1.6" status="bg"></td><td class="field" id="1.7" status="bg"></td><td class="field" id="1.8" status="bg"></td><td class="field" id="1.9" status="bg"></td><td class="field" id="1.10" status="bg"></td></tr>
+		</table>
+	</body>
+</html>
